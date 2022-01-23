@@ -14,23 +14,39 @@ import java.util.Date;
 public class WasserkarteInfoExporter implements CommandLineRunner
 {
     public enum Mode {Alamos, OFM}
-    private static String help = "Usage: java -jar WasserkarteInfoExporter.jar <TOKEN> <MODE(Alamos|OFM)>";
+    private static String help = "Usage: java -jar WasserkarteInfoExporter.jar <TOKEN> <LAT> <LNG> <MODE(Alamos|OFM)>";
 
     @Override
     public void run(String... args)
     {
-        if (args.length != 2) {
+        if (args.length != 4) {
             System.out.println(help);
             System.exit(1);
         }
+
         String token = args[0];
         if (token == null || token.isEmpty()) {
             System.out.println(help);
             System.exit(1);
         }
+
+        double lat = 0, lng = 0;
+        try {
+            lat = Double.parseDouble(args[1]);
+            lng = Double.parseDouble(args[2]);
+
+            if (lat < lng) {
+                throw new IllegalArgumentException("Coordinates seem wrong");
+            }
+        }
+        catch (NumberFormatException e) {
+            System.out.println(help);
+            System.exit(1);
+        }
+
         Mode mode = null;
         try {
-            mode = Mode.valueOf(args[1]);
+            mode = Mode.valueOf(args[3]);
         }
         catch (IllegalArgumentException e) {
             System.out.println(help);
@@ -40,7 +56,7 @@ public class WasserkarteInfoExporter implements CommandLineRunner
         String dateTime = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
         String csvContent, csvFileName;
         Charset charset;
-        Exporter exporter = new Exporter(token);
+        Exporter exporter = new Exporter(token, lat, lng);
 
         switch (mode) {
             case Alamos -> {
@@ -54,11 +70,6 @@ public class WasserkarteInfoExporter implements CommandLineRunner
                 charset = StandardCharsets.UTF_8;
             }
             default -> throw new IllegalStateException("Unknown mode");
-        }
-
-        if (csvContent == null || csvContent.isEmpty()) {
-            System.out.println("FAILED!");
-            System.exit(1);
         }
 
         // Write to file

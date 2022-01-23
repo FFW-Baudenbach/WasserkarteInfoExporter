@@ -62,4 +62,8 @@ public class Hydrant {
         this.diameter = diameter;
     }
 
+    @Override
+    public String toString() {
+        return "Id:" + getId() + ",Name:" + getName() + ", Type:" + getHydrantType() + ",Diameter:" + getDiameter();
+    }
 }
