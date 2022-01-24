@@ -1,6 +1,9 @@
 package WasserkarteInfoExporter;
 
+import WasserkarteInfoExporter.exporter.AlamosExporter;
 import WasserkarteInfoExporter.exporter.Exporter;
+import WasserkarteInfoExporter.exporter.IExporter;
+import WasserkarteInfoExporter.exporter.OfmExporter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -56,17 +59,19 @@ public class WasserkarteInfoExporter implements CommandLineRunner
         String dateTime = new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
         String csvContent, csvFileName;
         Charset charset;
-        Exporter exporter = new Exporter(token, lat, lng);
+        IExporter exporter;
 
         switch (mode) {
             case Alamos -> {
+                exporter = new AlamosExporter(token, lat, lng);
                 csvFileName = "wasserkarte.info_export_alamos_" + dateTime + ".csv";
-                csvContent = exporter.generateAlamosCsv();
+                csvContent = exporter.generateCsv();
                 charset = StandardCharsets.US_ASCII;
             }
             case OFM -> {
+                exporter = new OfmExporter(token, lat, lng);
                 csvFileName = "wasserkarte.info_export_ofm_" + dateTime + ".csv";
-                csvContent = exporter.generateOfmCsv();
+                csvContent = exporter.generateCsv();
                 charset = StandardCharsets.UTF_8;
             }
             default -> throw new IllegalStateException("Unknown mode");
